@@ -21,9 +21,7 @@ Controls
 | MouseLook     | M                             |
 
 
-
-[![VideoDemo]({https://github.com/vuvk/jVoxelSpace/blob/master/screenshot.png})]({https://youtu.be/7GVihAWIV5I})
-
+[VideoDemo](https://youtu.be/7GVihAWIV5I)
 
 
 License
