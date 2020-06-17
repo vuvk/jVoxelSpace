@@ -11,6 +11,13 @@ gradle for build.
 gradle build
 ```
 
+Features
+--------
+Multithread rendering
+Fog
+Window with settings
+
+
 Controls
 --------
 | Action        | Control                       |
@@ -20,6 +27,7 @@ Controls
 | Fly vertical  | Q/Z                           |
 | MouseLook     | M                             |
 
+![Screenshot](screenshot.png)
 
 [VideoDemo](https://youtu.be/7GVihAWIV5I)
 
