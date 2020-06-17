@@ -14,7 +14,9 @@ gradle build
 Features
 --------
 Multithread rendering
+
 Fog
+
 Window with settings
 
 
