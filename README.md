@@ -21,6 +21,11 @@ Controls
 | MouseLook     | M                             |
 
 
+
+[![VideoDemo]({https://github.com/vuvk/jVoxelSpace/blob/master/screenshot.png})]({https://youtu.be/7GVihAWIV5I})
+
+
+
 License
 -------
 The software part of the repository is under the Apache 2.0 license. Please read the license file for more information. Please keep in mind, that the Voxel Space technology might be still [patented](https://patents.justia.com/assignee/novalogic-inc) in some countries. The color and height maps are reverse engineered from the game Comanche and are therefore excluded from the license.
