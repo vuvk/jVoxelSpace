@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.vuvk'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+def mainClass = 'com.vuvk.voxelspace.forms.FormMain'
+
+if (!hasProperty('mainClass')) {
+    ext.mainClass = "${mainClass}"
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2')
+    }
+}
+
+dependencies {
+    compile 'org.jocl:jocl:2.0.2'
+}
+
+jar {        
+    baseName = 'voxelspace'
+    manifest {
+        attributes 'Main-Class': "${mainClass}",        	
+                   'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(' ')
+    }
+}
+
+task("copyDependencies", type: Copy) {
+    from(configurations.default).into("$buildDir/libs/lib")
+}
+
+build {
+    def tasks = [jar, copyDependencies]
+    for (int i = 0; i < tasks.size() - 1; i++) {
+        tasks[i + 1].mustRunAfter(tasks[i])
+    }
+    dependsOn(tasks)
+}
