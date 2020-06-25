@@ -25,14 +25,14 @@ import java.awt.geom.Point2D;
  */
 public class Camera {
     
-    public final static double MOVE_SPEED = 50.0;
-    public final static double ROT_SPEED  = 90.0;
+    public final static float MOVE_SPEED = 50.0f;
+    public final static float ROT_SPEED  = 90.0f;
     
     /** position on the map */
-    final private Point2D.Double position = new Point.Double();
-    final private Point2D.Double target   = new Point.Double();
+    final private Point2D.Float position = new Point.Float();
+    final private Point2D.Float target   = new Point.Float();
     
-    private double fov,
+    private float fov,
                    height,   // height of the camera
                    angle,    // direction of the camera
                    horizon,  // horizon position (look up and down)
@@ -52,7 +52,7 @@ public class Camera {
     private boolean enableGravity = false;
     private boolean enableMouseLook = false;
     
-    public Camera(double x, double y, double fov, double height, double angle, double horizon, double distance) {
+    public Camera(float x, float y, float fov, float height, float angle, float horizon, float distance) {
         setPosition(x, y);
         this.fov = fov;
         setHeight(height);
@@ -61,27 +61,27 @@ public class Camera {
         setDistance(distance);
     }
     
-    public double getX() {
+    public float getX() {
         return position.x;
     }
     
-    public double getY() {
+    public float getY() {
         return position.y;
     }
 
-    public Point2D.Double getPosition() {
+    public Point2D.Float getPosition() {
         return position;
     }
 
-    public Point2D.Double getTarget() {
+    public Point2D.Float getTarget() {
         return target;
     }
 
-    public double getFov() {
+    public float getFov() {
         return fov;
     }
     
-    public double getHeight() {
+    public float getHeight() {
         return height;
     }
 
@@ -93,15 +93,15 @@ public class Camera {
         return enableMouseLook;
     }
     
-    public double getAngle() {
+    public float getAngle() {
         return angle;
     }
     
-    public double getHorizon() {
+    public float getHorizon() {
         return horizon;
     }
 
-    public double getDistance() {
+    public float getDistance() {
         return distance;
     }
 
@@ -145,15 +145,15 @@ public class Camera {
         return moveL;
     }
     
-    public void setX(double x) {
+    public void setX(float x) {
         position.x = x;
     }
     
-    public void setY(double y) {
+    public void setY(float y) {
         position.y = y;
     }
     
-    public void setPosition(double x, double y) {
+    public void setPosition(float x, float y) {
         setX(x);
         setY(y);
     }
@@ -167,19 +167,19 @@ public class Camera {
         this.enableMouseLook = mouseLook;
     }
 
-    public void setHeight(double height) {
+    public void setHeight(float height) {
         this.height = height;
     }
 
-    public void setAngle(double angle) {
+    public void setAngle(float angle) {
         this.angle = angle;
     }
 
-    public void setHorizon(double horizon) {
+    public void setHorizon(float horizon) {
         this.horizon = horizon;
     }
 
-    public void setDistance(double distance) {
+    public void setDistance(float distance) {
         this.distance = distance;
     }
 
@@ -223,11 +223,11 @@ public class Camera {
         this.lookDown = lookDown;
     }
     
-    public void rotate(double angle) {
+    public void rotate(float angle) {
         this.angle += angle;
     }
     
-    public void pitch(double angle) {
+    public void pitch(float angle) {
         this.horizon += angle;
     }
     
@@ -242,7 +242,7 @@ public class Camera {
         target.y = Utils.cos(angle);
         
         if (moveF || moveB || moveR || moveL) {
-            double moveX = 0, 
+            float moveX = 0, 
                    moveY = 0;
 
             if (moveF) {

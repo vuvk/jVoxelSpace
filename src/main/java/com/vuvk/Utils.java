@@ -20,26 +20,26 @@ package com.vuvk;
  * @author Anton "Vuvk" Shcherbatykh
  */
 public final class Utils {    
-    private final static double[]   sins = new double[3600];
-    private final static double[] cosins = new double[3600];
+    private final static float[]   sins = new float[3600];
+    private final static float[] cosins = new float[3600];
     static {        
         for (int i = 0; i < 3600; ++i) {
             double rad = Math.toRadians(i * 0.1);
-              sins[i] = Math.sin(rad);
-            cosins[i] = Math.cos(rad);
+              sins[i] = (float) Math.sin(rad);
+            cosins[i] = (float) Math.cos(rad);
         }        
     }
     
     private Utils() {}
     
-    public static double sin(double degree) {
+    public static float sin(float degree) {
         int angle = (int)(degree * 10);
         while (angle < 0)  { angle += 3600; }
         if (angle >= 3600) { angle %= 3599; }
         return sins[angle];
     }
     
-    public static double cos(double degree) {
+    public static float cos(float degree) {
         int angle = (int)(degree * 10);
         while (angle < 0)  { angle += 3600; }
         if (angle >= 3600) { angle %= 3599; }

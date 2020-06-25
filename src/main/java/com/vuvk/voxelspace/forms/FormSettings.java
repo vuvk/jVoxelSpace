@@ -70,7 +70,7 @@ public class FormSettings extends javax.swing.JFrame {
         int distance = (int) camera.getDistance();
         sldDistance.setValue((int) camera.getDistance());
         
-        sldDetalization.setValue((int) (Global.detalization * 1000));
+        sldDetalization.setValue((int) (Global.detalization * 10000));
         
         chkGravity.setSelected(camera.isEnableGravity());
         
@@ -370,7 +370,7 @@ public class FormSettings extends javax.swing.JFrame {
     }//GEN-LAST:event_chkGravityActionPerformed
 
     private void sldDetalizationStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldDetalizationStateChanged
-        Global.detalization = sldDetalization.getValue() * 0.0001;
+        Global.detalization = sldDetalization.getValue() * 0.0001f;
     }//GEN-LAST:event_sldDetalizationStateChanged
 
     private void btnSkyColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSkyColorActionPerformed

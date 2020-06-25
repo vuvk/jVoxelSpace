@@ -30,6 +30,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,22 +48,20 @@ public class FormMain extends javax.swing.JFrame {
 
     Camera camera;
     Map map;
-    int[] yHeights;
-    //int[] ySky;
     
     Robot mouseManager;
     Point mouseLocation;
 
     BufferedImage screen;
     Graphics screenGraphics;
-    DataBuffer screenBuffer;
+    int[] screenBuffer;
     
     private class RenderTask implements Runnable {
         CountDownLatch latch;
-        final double angleFrom, angleTo;
+        final float angleFrom, angleTo;
         final int xFrom, xTo;
         
-        RenderTask(final String name, final double angleFrom, final double angleTo, final int xFrom, final int xTo) {
+        RenderTask(final String name, final float angleFrom, final float angleTo, final int xFrom, final int xTo) {
             this.angleFrom = angleFrom;
             this.angleTo   = angleTo;
             this.xFrom = xFrom;
@@ -87,8 +86,7 @@ public class FormMain extends javax.swing.JFrame {
     private void initScreen() {        
         screen = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
         screenGraphics = screen.getGraphics();
-        screenBuffer = screen.getRaster().getDataBuffer();        
-        yHeights = new int[getWidth()]; 
+        screenBuffer = ((DataBufferInt)screen.getRaster().getDataBuffer()).getData();      
         
         mouseLocation = new Point(screen.getWidth() >> 1, screen.getHeight() >> 1);
     }
@@ -96,15 +94,15 @@ public class FormMain extends javax.swing.JFrame {
     private void initThreads() {    
         int xStep = screen.getWidth() / Global.THREADS_COUNT;
         int xStart = 0;
-        double angleStep = camera.getFov() / Global.THREADS_COUNT;
-        double halfFov = camera.getFov() * 0.5;
-        double angleStart = -halfFov;
+        float angleStep = camera.getFov() / Global.THREADS_COUNT;
+        float halfFov = camera.getFov() * 0.5f;
+        float angleStart = -halfFov;
         
         for (int i = 0; i < Global.THREADS_COUNT; ++i, xStart += xStep, angleStart += angleStep) {
             int xFrom = xStart;
             int xTo   = xFrom + xStep;   
-            double angleFrom = angleStart;
-            double angleTo   = angleStart + angleStep;
+            float angleFrom = angleStart;
+            float angleTo   = angleStart + angleStep;
             if (i == Global.THREADS_COUNT - 1) {
                 xTo = screen.getWidth();
                 angleTo = halfFov;
@@ -157,19 +155,17 @@ public class FormMain extends javax.swing.JFrame {
     }
 
     void clear(int color) {
-        for (int i = 0; i < screenBuffer.getSize(); ++i) {
-            screenBuffer.setElem(i, color);
-        }
+        Utils.arrayFastFill(screenBuffer, color);
     }
     
-    private int addColor(int colorSrc, int colorDst, double power) {
-        if (power <= 0.05) {
+    private int addColor(int colorSrc, int colorDst, float power) {
+        if (power <= 0.05f) {
             return colorSrc;
-        } else if (power >= 0.95) {
+        } else if (power >= 0.95f) {
             return colorDst;
         } else {
-            double brS = 1.0 - power;
-            double brD = power;
+            float brS = 1.0f - power;
+            float brD = power;
             
             int rS = (int)(((colorSrc >> 16) & 0xFF) * brS);
             int gS = (int)(((colorSrc >>  8) & 0xFF) * brS);
@@ -206,11 +202,11 @@ public class FormMain extends javax.swing.JFrame {
 
         int offset = ytop * scrWidth + x;
         for (int y = ytop; y < ybottom; ++y, offset += scrWidth) {
-            screenBuffer.setElem(offset, color);
+            screenBuffer[offset] = color;
         }
     }
 
-    void render(double angleFrom, double angleTo, int xFrom, int xTo) {
+    void render(float angleFrom, float angleTo, int xFrom, int xTo) {
         int mapWidthPeriod  = Map.WIDTH - 1;
         int mapHeightPeriod = Map.HEIGHT - 1;
 
@@ -220,38 +216,34 @@ public class FormMain extends javax.swing.JFrame {
 
         int[][] cMap = map.getColorMap();
         int[][] hMap = map.getHeightMap();
-
-        for (int x = xFrom; x < xTo; ++x) {
-            yHeights[x] = screenHeight;
-        }
         
         int skyHeight;
 
-        double sx, sy;
-        double cx = camera.getX(),
+        float sx, sy;
+        float cx = camera.getX(),
                cy = camera.getY();
         
-        double angleRay = camera.getAngle() + angleFrom;
-        double correctAngle = angleFrom;
-        double angleStep = (angleTo - angleFrom) / renderWidth;
-        double distance = camera.getDistance();
-        double cameraHeight = camera.getHeight();
-        double horizon = camera.getHorizon();
+        float angleRay = camera.getAngle() + angleFrom;
+        float correctAngle = angleFrom;
+        float angleStep = (angleTo - angleFrom) / renderWidth;
+        float distance = camera.getDistance();
+        float cameraHeight = camera.getHeight();
+        float horizon = camera.getHorizon();
         
-        double fogFactor = 1.0 / (Global.fogEnd - Global.fogStart);
+        float fogFactor = 1.0f / (Global.fogEnd - Global.fogStart);
 
         for (int x = xFrom; x < xTo; ++x, angleRay += angleStep, correctAngle += angleStep) {;  
             sx = Utils.sin(angleRay);  
             sy = Utils.cos(angleRay);
             
             // correct length of ray
-            double correct = 1.0 / Utils.cos(correctAngle);
+            float correct = 1.0f / Utils.cos(correctAngle);
             sx *= correct;
             sy *= correct;
             
             skyHeight = screenHeight;
             
-            for (double dz = 0.1, z = 1.0; z < distance; z += dz, dz += Global.detalization) {
+            for (float dz = 0.1f, z = 1.0f; z < distance; z += dz, dz += Global.detalization) {
                 int px = (int)(cx + sx * z),
                     py = (int)(cy + sy * z);
 
@@ -270,7 +262,7 @@ public class FormMain extends javax.swing.JFrame {
                 if (Global.fogEnabled) {
                     if (z >= Global.fogStart) {
                         if (z < Global.fogEnd) {
-                            double power = (z - Global.fogStart) * fogFactor;
+                            float power = (z - Global.fogStart) * fogFactor;
                             color = addColor(color, Global.fogColor, power);
                         } else {
                             color = Global.fogColor;
@@ -278,11 +270,7 @@ public class FormMain extends javax.swing.JFrame {
                     }
                 }
                 
-                drawVerticalLine(x, heightOnScreen, (int)yHeights[x], color);
-                if (heightOnScreen < yHeights[x]) {
-                    yHeights[x] = heightOnScreen;
-                }
-                
+                drawVerticalLine(x, heightOnScreen, skyHeight, color);                
                 if (heightOnScreen < skyHeight) {
                     skyHeight = heightOnScreen;
                 }
@@ -326,7 +314,7 @@ public class FormMain extends javax.swing.JFrame {
                 Thread.yield();
             }
         } else {
-            double halfFov = camera.getFov() * 0.5;
+            float halfFov = camera.getFov() * 0.5f;
             render(-halfFov, halfFov, 0, screen.getWidth());
         }
         
@@ -372,6 +360,8 @@ public class FormMain extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("swinger VoxelSpace");
+        setPreferredSize(new java.awt.Dimension(640, 480));
+        setSize(new java.awt.Dimension(640, 480));
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
                 formMouseMoved(evt);
@@ -466,16 +456,16 @@ public class FormMain extends javax.swing.JFrame {
             case KeyEvent.VK_EQUALS :
             case KeyEvent.VK_INSERT :
                 Global.detalization += Global.deltaTime;
-                if (Global.detalization > 0.15) {
-                    Global.detalization = 0.15;
+                if (Global.detalization > 0.15f) {
+                    Global.detalization = 0.15f;
                 }
                 break;
 
             case KeyEvent.VK_MINUS :
             case KeyEvent.VK_DELETE :
                 Global.detalization -= Global.deltaTime;
-                if (Global.detalization < 0.0001) {
-                    Global.detalization = 0.0001;
+                if (Global.detalization < 0.0001f) {
+                    Global.detalization = 0.0001f;
                 }
                 break;
                 
